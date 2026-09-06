@@ -1,0 +1,42 @@
+{
+  "id": "shar-production-metadata-release-gate",
+  "name": "SHAR Production — Production Metadata Release Gate",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d15d5684-4ea5-48ac-bdb2-78c0c9d5a101",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const manifest = { title: 'Synthetic delivery fixture', project: 'SHAR Production', stage: 'delivery', rights_status: 'cleared' };\nconst stages = new Set(['preproduction', 'production', 'postproduction', 'delivery']);\nconst releasable = new Set(['cleared', 'licensed', 'synthetic']);\nconst errors = [];\nfor (const key of ['title', 'project', 'stage', 'rights_status']) {\n  if (typeof manifest[key] !== 'string' || !manifest[key].trim()) errors.push(`${key} is required`);\n}\nif (manifest.stage && !stages.has(manifest.stage)) errors.push('stage is invalid');\nif (manifest.rights_status === 'unknown') errors.push('rights_status=unknown is not releasable');\nif (manifest.rights_status && manifest.rights_status !== 'unknown' && !releasable.has(manifest.rights_status)) errors.push('rights_status is invalid');\nreturn [{ json: { publisher: 'SHAR Production', website: 'https://sharprod.com/', releasable: errors.length === 0, errors, declared_manifest: manifest } }];"
+      },
+      "id": "603e48e6-b527-4d0c-bff3-e727945340ec",
+      "name": "Validate Production Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 0]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{
+        "node": "Validate Production Metadata",
+        "type": "main",
+        "index": 0
+      }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {},
+  "versionId": "a32175c8-b098-4ed9-b1e5-94f5bb4d6591",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "shar-production-local-validation"
+  },
+  "tags": []
+}
